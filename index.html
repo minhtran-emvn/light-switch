@@ -210,6 +210,103 @@
             margin-bottom: 10px;
             font-size: 1.2em;
         }
+
+        /* Color picker container */
+        .color-container {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .light-on .color-container {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .color-label {
+            font-size: 1em;
+            color: #fde9b9;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .color-value {
+            font-weight: bold;
+            color: #f9d67a;
+            text-transform: uppercase;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            overflow: hidden;
+            padding: 0;
+            background: none;
+            transition: transform 0.2s ease;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.1);
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-picker::-moz-color-swatch {
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .color-preset {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .color-preset:hover {
+            transform: scale(1.15);
+            border-color: #ffffff;
+        }
+
+        .color-preset.active {
+            border-color: #f9d67a;
+            box-shadow: 0 0 20px rgba(249, 214, 122, 0.6);
+        }
     </style>
 </head>
 <body class="light-off">
@@ -249,6 +346,31 @@
                 onchange="updateBrightness(this.value)"
             >
         </div>
+
+        <!-- Color Control -->
+        <div class="color-container" id="color-container">
+            <div class="color-label">
+                <span>🎨 Màu đèn</span>
+                <span class="color-value" id="color-value">#F9D67A</span>
+            </div>
+            <div class="color-picker-wrapper">
+                <input 
+                    type="color" 
+                    value="#f9d67a" 
+                    class="color-picker" 
+                    id="color-picker"
+                    onchange="updateColor(this.value)"
+                >
+            </div>
+            <div class="color-presets" id="color-presets">
+                <div class="color-preset active" style="background: #f9d67a;" data-color="#f9d67a" onclick="selectPreset('#f9d67a')"></div>
+                <div class="color-preset" style="background: #ff6b6b;" data-color="#ff6b6b" onclick="selectPreset('#ff6b6b')"></div>
+                <div class="color-preset" style="background: #4ecdc4;" data-color="#4ecdc4" onclick="selectPreset('#4ecdc4')"></div>
+                <div class="color-preset" style="background: #95e1d3;" data-color="#95e1d3" onclick="selectPreset('#95e1d3')"></div>
+                <div class="color-preset" style="background: #dda0dd;" data-color="#dda0dd" onclick="selectPreset('#dda0dd')"></div>
+                <div class="color-preset" style="background: #ffffff;" data-color="#ffffff" onclick="selectPreset('#ffffff')"></div>
+            </div>
+        </div>
         
         <div class="status" id="status">
             Đèn đang TẮT
@@ -263,6 +385,7 @@
         let isLightOn = false;
         let toggleCount = 0;
         let brightness = 100;
+        let currentColor = '#f9d67a';
 
         function toggleLight() {
             isLightOn = !isLightOn;
@@ -347,8 +470,11 @@
             // Apply to bulb - opacity and glow
             bulbSvg.style.opacity = 0.3 + (factor * 0.7);
             const glowIntensity = factor;
-            bulbSvg.style.filter = `drop-shadow(0 0 ${30 * glowIntensity}px rgba(255, 255, 0, ${0.6 * glowIntensity}))
-                                    drop-shadow(0 0 ${60 * glowIntensity}px rgba(255, 200, 0, ${0.4 * glowIntensity}))`;
+            
+            // Parse current color to RGB for glow effect
+            const rgb = hexToRgb(currentColor);
+            bulbSvg.style.filter = `drop-shadow(0 0 ${30 * glowIntensity}px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.6 * glowIntensity}))
+                                    drop-shadow(0 0 ${60 * glowIntensity}px rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${0.4 * glowIntensity}))`;
             
             // Apply to background - adjust overall brightness with CSS filter
             // At 100%: no filter (normal), at 10%: darker background
@@ -356,10 +482,77 @@
             body.style.filter = `brightness(${bgBrightness})`;
         }
 
+        function updateColor(color) {
+            currentColor = color;
+            document.getElementById('color-value').textContent = color.toUpperCase();
+            document.getElementById('color-picker').value = color;
+            
+            // Update active preset
+            document.querySelectorAll('.color-preset').forEach(preset => {
+                preset.classList.remove('active');
+                if (preset.dataset.color.toLowerCase() === color.toLowerCase()) {
+                    preset.classList.add('active');
+                }
+            });
+            
+            if (isLightOn) {
+                applyColor(color);
+                saveState();
+            }
+        }
+
+        function selectPreset(color) {
+            updateColor(color);
+        }
+
+        function applyColor(color) {
+            const lightBulb = document.getElementById('light-bulb');
+            const bulbSvg = lightBulb.querySelector('svg');
+            
+            // Parse color to RGB
+            const rgb = hexToRgb(color);
+            
+            // Update bulb glass fill color
+            const bulbPath = bulbSvg.querySelector('path[d*="M12 2C8.13"]');
+            if (bulbPath) {
+                bulbPath.setAttribute('fill', color);
+                bulbPath.setAttribute('stroke', adjustColor(color, -40));
+            }
+            
+            // Update filament color
+            const filaments = bulbSvg.querySelectorAll('path[stroke*="#f9a825"]');
+            filaments.forEach(filament => {
+                filament.setAttribute('stroke', adjustColor(color, -40));
+            });
+            
+            // Re-apply brightness with new color
+            if (isLightOn) {
+                applyBrightness(brightness);
+            }
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 249, g: 214, b: 122 };
+        }
+
+        function adjustColor(hex, amount) {
+            const rgb = hexToRgb(hex);
+            const r = Math.max(0, Math.min(255, rgb.r + amount));
+            const g = Math.max(0, Math.min(255, rgb.g + amount));
+            const b = Math.max(0, Math.min(255, rgb.b + amount));
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
         function saveState() {
             localStorage.setItem('lightState', isLightOn);
             localStorage.setItem('toggleCount', toggleCount);
             localStorage.setItem('brightness', brightness);
+            localStorage.setItem('color', currentColor);
         }
 
         // Load saved state on page load
@@ -367,6 +560,7 @@
             const savedState = localStorage.getItem('lightState');
             const savedCount = localStorage.getItem('toggleCount');
             const savedBrightness = localStorage.getItem('brightness');
+            const savedColor = localStorage.getItem('color');
             
             if (savedState !== null) {
                 isLightOn = savedState === 'true';
@@ -383,6 +577,23 @@
                 document.getElementById('brightness-value').textContent = brightness + '%';
             }
             
+            if (savedColor !== null) {
+                currentColor = savedColor;
+                document.getElementById('color-picker').value = savedColor;
+                document.getElementById('color-value').textContent = savedColor.toUpperCase();
+                
+                // Update active preset
+                document.querySelectorAll('.color-preset').forEach(preset => {
+                    preset.classList.remove('active');
+                    if (preset.dataset.color.toLowerCase() === savedColor.toLowerCase()) {
+                        preset.classList.add('active');
+                    }
+                });
+                
+                // Apply color to bulb
+                applyColor(savedColor);
+            }
+            
             // Apply saved state
             if (isLightOn) {
                 document.body.classList.remove('light-off');
@@ -394,9 +605,11 @@
                 document.getElementById('switch-btn').textContent = 'Tắt đèn';
                 document.getElementById('status').textContent = 'Đèn đang BẬT ✨';
                 
-                // Enable and apply brightness
+                // Enable brightness and color controls
                 document.getElementById('brightness-container').style.opacity = '1';
                 document.getElementById('brightness-container').style.pointerEvents = 'all';
+                document.getElementById('color-container').style.opacity = '1';
+                document.getElementById('color-container').style.pointerEvents = 'all';
                 applyBrightness(brightness);
             }
         });
