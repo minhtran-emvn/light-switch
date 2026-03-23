@@ -19,9 +19,10 @@
             align-items: center;
             justify-content: center;
             transition: background 0.5s ease;
+            padding: 20px;
         }
 
-        /* Light ON state */
+        /* Light ON state - dynamic brightness */
         body.light-on {
             background: linear-gradient(135deg, #fef9e7 0%, #fde9b9 50%, #f9d67a 100%);
         }
@@ -33,6 +34,13 @@
 
         .container {
             text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
         }
 
         .light-bulb {
@@ -42,6 +50,7 @@
             user-select: none;
             margin-bottom: 30px;
             filter: drop-shadow(0 0 0 rgba(255, 255, 0, 0));
+            display: inline-block;
         }
 
         .light-bulb:hover {
@@ -49,25 +58,23 @@
         }
 
         .light-bulb.on {
-            filter: drop-shadow(0 0 50px rgba(255, 255, 0, 0.8))
-                    drop-shadow(0 0 100px rgba(255, 200, 0, 0.5));
             animation: glow 1s ease-in-out infinite alternate;
         }
 
         @keyframes glow {
             from {
-                filter: drop-shadow(0 0 50px rgba(255, 255, 0, 0.8))
-                        drop-shadow(0 0 100px rgba(255, 200, 0, 0.5));
+                filter: drop-shadow(0 0 30px rgba(255, 255, 0, 0.6))
+                        drop-shadow(0 0 60px rgba(255, 200, 0, 0.4));
             }
             to {
-                filter: drop-shadow(0 0 70px rgba(255, 255, 0, 1))
-                        drop-shadow(0 0 120px rgba(255, 200, 0, 0.7));
+                filter: drop-shadow(0 0 50px rgba(255, 255, 0, 0.9))
+                        drop-shadow(0 0 100px rgba(255, 200, 0, 0.6));
             }
         }
 
         .switch-btn {
-            padding: 20px 60px;
-            font-size: 1.5em;
+            padding: 18px 50px;
+            font-size: 1.3em;
             font-weight: bold;
             border: none;
             border-radius: 50px;
@@ -75,6 +82,7 @@
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-bottom: 25px;
         }
 
         .switch-btn.on {
@@ -97,9 +105,81 @@
             transform: translateY(0);
         }
 
+        /* Brightness slider container */
+        .brightness-container {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .light-on .brightness-container {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .brightness-label {
+            font-size: 1em;
+            color: #fde9b9;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brightness-value {
+            font-weight: bold;
+            color: #f9d67a;
+        }
+
+        .brightness-slider {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #4a4a6a, #f9d67a, #f9a825);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .brightness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .brightness-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .brightness-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        .brightness-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
         .status {
-            margin-top: 30px;
-            font-size: 1.5em;
+            margin-top: 25px;
+            font-size: 1.4em;
             font-weight: bold;
             transition: color 0.5s ease;
         }
@@ -114,12 +194,21 @@
 
         .toggle-count {
             margin-top: 20px;
-            font-size: 1em;
+            font-size: 0.9em;
             color: #888;
         }
 
         .light-on .toggle-count {
             color: #666;
+        }
+
+        /* Brightness icons */
+        .brightness-icons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
         }
     </style>
 </head>
@@ -132,6 +221,23 @@
         <button class="switch-btn off" id="switch-btn" onclick="toggleLight()">
             Bật đèn
         </button>
+
+        <!-- Brightness Control -->
+        <div class="brightness-container" id="brightness-container">
+            <div class="brightness-label">
+                <span>🔆 Độ sáng</span>
+                <span class="brightness-value" id="brightness-value">100%</span>
+            </div>
+            <input 
+                type="range" 
+                min="10" 
+                max="100" 
+                value="100" 
+                class="brightness-slider" 
+                id="brightness-slider"
+                onchange="updateBrightness(this.value)"
+            >
+        </div>
         
         <div class="status" id="status">
             Đèn đang TẮT
@@ -145,6 +251,7 @@
     <script>
         let isLightOn = false;
         let toggleCount = 0;
+        let brightness = 100;
 
         function toggleLight() {
             isLightOn = !isLightOn;
@@ -155,6 +262,7 @@
             const switchBtn = document.getElementById('switch-btn');
             const status = document.getElementById('status');
             const count = document.getElementById('count');
+            const brightnessContainer = document.getElementById('brightness-container');
             
             if (isLightOn) {
                 // Turn ON
@@ -169,6 +277,13 @@
                 switchBtn.textContent = 'Tắt đèn';
                 
                 status.textContent = 'Đèn đang BẬT ✨';
+                
+                // Enable brightness control
+                brightnessContainer.style.opacity = '1';
+                brightnessContainer.style.pointerEvents = 'all';
+                
+                // Apply current brightness
+                applyBrightness(brightness);
             } else {
                 // Turn OFF
                 body.classList.remove('light-on');
@@ -182,19 +297,54 @@
                 switchBtn.textContent = 'Bật đèn';
                 
                 status.textContent = 'Đèn đang TẮT 🌙';
+                
+                // Disable brightness control
+                brightnessContainer.style.opacity = '0.5';
+                brightnessContainer.style.pointerEvents = 'none';
+                
+                // Reset bulb opacity
+                lightBulb.style.opacity = '1';
             }
             
             count.textContent = toggleCount;
             
             // Save state to localStorage
+            saveState();
+        }
+
+        function updateBrightness(value) {
+            brightness = parseInt(value);
+            document.getElementById('brightness-value').textContent = brightness + '%';
+            
+            if (isLightOn) {
+                applyBrightness(brightness);
+                saveState();
+            }
+        }
+
+        function applyBrightness(value) {
+            const lightBulb = document.getElementById('light-bulb');
+            // Opacity ranges from 0.3 (dim) to 1 (full brightness)
+            const opacity = 0.3 + (value / 100) * 0.7;
+            lightBulb.style.opacity = opacity;
+            
+            // Adjust glow intensity based on brightness
+            const glowIntensity = value / 100;
+            lightBulb.style.filter = `drop-shadow(0 0 ${30 * glowIntensity}px rgba(255, 255, 0, ${0.6 * glowIntensity}))
+                                      drop-shadow(0 0 ${60 * glowIntensity}px rgba(255, 200, 0, ${0.4 * glowIntensity}))`;
+        }
+
+        function saveState() {
             localStorage.setItem('lightState', isLightOn);
             localStorage.setItem('toggleCount', toggleCount);
+            localStorage.setItem('brightness', brightness);
         }
 
         // Load saved state on page load
         window.addEventListener('DOMContentLoaded', () => {
             const savedState = localStorage.getItem('lightState');
             const savedCount = localStorage.getItem('toggleCount');
+            const savedBrightness = localStorage.getItem('brightness');
             
             if (savedState !== null) {
                 isLightOn = savedState === 'true';
@@ -203,6 +353,12 @@
             if (savedCount !== null) {
                 toggleCount = parseInt(savedCount);
                 document.getElementById('count').textContent = toggleCount;
+            }
+            
+            if (savedBrightness !== null) {
+                brightness = parseInt(savedBrightness);
+                document.getElementById('brightness-slider').value = brightness;
+                document.getElementById('brightness-value').textContent = brightness + '%';
             }
             
             // Apply saved state
@@ -215,6 +371,11 @@
                 document.getElementById('switch-btn').classList.add('off');
                 document.getElementById('switch-btn').textContent = 'Tắt đèn';
                 document.getElementById('status').textContent = 'Đèn đang BẬT ✨';
+                
+                // Enable and apply brightness
+                document.getElementById('brightness-container').style.opacity = '1';
+                document.getElementById('brightness-container').style.pointerEvents = 'all';
+                applyBrightness(brightness);
             }
         });
     </script>
