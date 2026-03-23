@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💡 Công Tắc Đèn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.5s ease;
+        }
+
+        /* Light ON state */
+        body.light-on {
+            background: linear-gradient(135deg, #fef9e7 0%, #fde9b9 50%, #f9d67a 100%);
+        }
+
+        /* Light OFF state */
+        body.light-off {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .light-bulb {
+            font-size: 150px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 0 rgba(255, 255, 0, 0));
+        }
+
+        .light-bulb:hover {
+            transform: scale(1.1);
+        }
+
+        .light-bulb.on {
+            filter: drop-shadow(0 0 50px rgba(255, 255, 0, 0.8))
+                    drop-shadow(0 0 100px rgba(255, 200, 0, 0.5));
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 50px rgba(255, 255, 0, 0.8))
+                        drop-shadow(0 0 100px rgba(255, 200, 0, 0.5));
+            }
+            to {
+                filter: drop-shadow(0 0 70px rgba(255, 255, 0, 1))
+                        drop-shadow(0 0 120px rgba(255, 200, 0, 0.7));
+            }
+        }
+
+        .switch-btn {
+            padding: 20px 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .switch-btn.on {
+            background: linear-gradient(135deg, #f9d67a, #f9a825);
+            color: #1a1a2e;
+            box-shadow: 0 10px 30px rgba(249, 168, 37, 0.4);
+        }
+
+        .switch-btn.off {
+            background: linear-gradient(135deg, #4a4a6a, #2a2a4a);
+            color: #fde9b9;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .switch-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .switch-btn:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            transition: color 0.5s ease;
+        }
+
+        .light-on .status {
+            color: #f9a825;
+        }
+
+        .light-off .status {
+            color: #888;
+        }
+
+        .toggle-count {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #888;
+        }
+
+        .light-on .toggle-count {
+            color: #666;
+        }
+    </style>
+</head>
+<body class="light-off">
+    <div class="container">
+        <div class="light-bulb off" id="light-bulb" onclick="toggleLight()">
+            💡
+        </div>
+        
+        <button class="switch-btn off" id="switch-btn" onclick="toggleLight()">
+            Bật đèn
+        </button>
+        
+        <div class="status" id="status">
+            Đèn đang TẮT
+        </div>
+        
+        <div class="toggle-count">
+            Số lần bật/tắt: <span id="count">0</span>
+        </div>
+    </div>
+
+    <script>
+        let isLightOn = false;
+        let toggleCount = 0;
+
+        function toggleLight() {
+            isLightOn = !isLightOn;
+            toggleCount++;
+            
+            const body = document.body;
+            const lightBulb = document.getElementById('light-bulb');
+            const switchBtn = document.getElementById('switch-btn');
+            const status = document.getElementById('status');
+            const count = document.getElementById('count');
+            
+            if (isLightOn) {
+                // Turn ON
+                body.classList.remove('light-off');
+                body.classList.add('light-on');
+                
+                lightBulb.classList.remove('off');
+                lightBulb.classList.add('on');
+                
+                switchBtn.classList.remove('on');
+                switchBtn.classList.add('off');
+                switchBtn.textContent = 'Tắt đèn';
+                
+                status.textContent = 'Đèn đang BẬT ✨';
+            } else {
+                // Turn OFF
+                body.classList.remove('light-on');
+                body.classList.add('light-off');
+                
+                lightBulb.classList.remove('on');
+                lightBulb.classList.add('off');
+                
+                switchBtn.classList.remove('off');
+                switchBtn.classList.add('on');
+                switchBtn.textContent = 'Bật đèn';
+                
+                status.textContent = 'Đèn đang TẮT 🌙';
+            }
+            
+            count.textContent = toggleCount;
+            
+            // Save state to localStorage
+            localStorage.setItem('lightState', isLightOn);
+            localStorage.setItem('toggleCount', toggleCount);
+        }
+
+        // Load saved state on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedState = localStorage.getItem('lightState');
+            const savedCount = localStorage.getItem('toggleCount');
+            
+            if (savedState !== null) {
+                isLightOn = savedState === 'true';
+            }
+            
+            if (savedCount !== null) {
+                toggleCount = parseInt(savedCount);
+                document.getElementById('count').textContent = toggleCount;
+            }
+            
+            // Apply saved state
+            if (isLightOn) {
+                document.body.classList.remove('light-off');
+                document.body.classList.add('light-on');
+                document.getElementById('light-bulb').classList.remove('off');
+                document.getElementById('light-bulb').classList.add('on');
+                document.getElementById('switch-btn').classList.remove('on');
+                document.getElementById('switch-btn').classList.add('off');
+                document.getElementById('switch-btn').textContent = 'Tắt đèn';
+                document.getElementById('status').textContent = 'Đèn đang BẬT ✨';
+            }
+        });
+    </script>
+</body>
+</html>
