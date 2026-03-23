@@ -18,7 +18,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: background 0.5s ease;
+            transition: background 0.5s ease, filter 0.5s ease;
             padding: 20px;
         }
 
@@ -44,17 +44,17 @@
         }
 
         .light-bulb {
-            font-size: 150px;
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: none;
             margin-bottom: 30px;
-            filter: drop-shadow(0 0 0 rgba(255, 255, 0, 0));
             display: inline-block;
+            width: 180px;
+            height: 180px;
         }
 
         .light-bulb:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
         }
 
         .light-bulb.on {
@@ -214,8 +214,19 @@
 </head>
 <body class="light-off">
     <div class="container">
+        <!-- SVG Light Bulb -->
         <div class="light-bulb off" id="light-bulb" onclick="toggleLight()">
-            💡
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Bulb glass -->
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z" 
+                      fill="#f9d67a" stroke="#f9a825" stroke-width="1.5" stroke-linejoin="round"/>
+                <!-- Bulb base -->
+                <rect x="9" y="17" width="6" height="3" fill="#a0a0a0" stroke="#707070" stroke-width="1.5"/>
+                <rect x="9" y="20" width="6" height="2" fill="#808080" stroke="#606060" stroke-width="1.5"/>
+                <!-- Filament -->
+                <path d="M10 9c0-1.1.9-2 2-2s2 .9 2 2" stroke="#f9a825" stroke-width="1" fill="none" opacity="0.6"/>
+                <path d="M12 7v3" stroke="#f9a825" stroke-width="1" fill="none" opacity="0.6"/>
+            </svg>
         </div>
         
         <button class="switch-btn off" id="switch-btn" onclick="toggleLight()">
@@ -263,6 +274,7 @@
             const status = document.getElementById('status');
             const count = document.getElementById('count');
             const brightnessContainer = document.getElementById('brightness-container');
+            const bulbSvg = lightBulb.querySelector('svg');
             
             if (isLightOn) {
                 // Turn ON
@@ -272,8 +284,8 @@
                 lightBulb.classList.remove('off');
                 lightBulb.classList.add('on');
                 
-                switchBtn.classList.remove('on');
-                switchBtn.classList.add('off');
+                switchBtn.classList.remove('off');
+                switchBtn.classList.add('on');
                 switchBtn.textContent = 'Tắt đèn';
                 
                 status.textContent = 'Đèn đang BẬT ✨';
@@ -292,8 +304,8 @@
                 lightBulb.classList.remove('on');
                 lightBulb.classList.add('off');
                 
-                switchBtn.classList.remove('off');
-                switchBtn.classList.add('on');
+                switchBtn.classList.remove('on');
+                switchBtn.classList.add('off');
                 switchBtn.textContent = 'Bật đèn';
                 
                 status.textContent = 'Đèn đang TẮT 🌙';
@@ -302,8 +314,10 @@
                 brightnessContainer.style.opacity = '0.5';
                 brightnessContainer.style.pointerEvents = 'none';
                 
-                // Reset bulb opacity
-                lightBulb.style.opacity = '1';
+                // Reset bulb and background
+                bulbSvg.style.opacity = '1';
+                bulbSvg.style.filter = 'none';
+                body.style.filter = 'none';
             }
             
             count.textContent = toggleCount;
@@ -324,14 +338,22 @@
 
         function applyBrightness(value) {
             const lightBulb = document.getElementById('light-bulb');
-            // Opacity ranges from 0.3 (dim) to 1 (full brightness)
-            const opacity = 0.3 + (value / 100) * 0.7;
-            lightBulb.style.opacity = opacity;
+            const bulbSvg = lightBulb.querySelector('svg');
+            const body = document.body;
             
-            // Adjust glow intensity based on brightness
-            const glowIntensity = value / 100;
-            lightBulb.style.filter = `drop-shadow(0 0 ${30 * glowIntensity}px rgba(255, 255, 0, ${0.6 * glowIntensity}))
-                                      drop-shadow(0 0 ${60 * glowIntensity}px rgba(255, 200, 0, ${0.4 * glowIntensity}))`;
+            // Calculate brightness factor (0.1 to 1.0)
+            const factor = value / 100;
+            
+            // Apply to bulb - opacity and glow
+            bulbSvg.style.opacity = 0.3 + (factor * 0.7);
+            const glowIntensity = factor;
+            bulbSvg.style.filter = `drop-shadow(0 0 ${30 * glowIntensity}px rgba(255, 255, 0, ${0.6 * glowIntensity}))
+                                    drop-shadow(0 0 ${60 * glowIntensity}px rgba(255, 200, 0, ${0.4 * glowIntensity}))`;
+            
+            // Apply to background - adjust overall brightness with CSS filter
+            // At 100%: no filter (normal), at 10%: darker background
+            const bgBrightness = 0.5 + (factor * 0.5); // ranges from 0.5 to 1.0
+            body.style.filter = `brightness(${bgBrightness})`;
         }
 
         function saveState() {
@@ -367,8 +389,8 @@
                 document.body.classList.add('light-on');
                 document.getElementById('light-bulb').classList.remove('off');
                 document.getElementById('light-bulb').classList.add('on');
-                document.getElementById('switch-btn').classList.remove('on');
-                document.getElementById('switch-btn').classList.add('off');
+                document.getElementById('switch-btn').classList.remove('off');
+                document.getElementById('switch-btn').classList.add('on');
                 document.getElementById('switch-btn').textContent = 'Tắt đèn';
                 document.getElementById('status').textContent = 'Đèn đang BẬT ✨';
                 
