@@ -1,0 +1,11 @@
+{
+  "name": "light-switch-tests",
+  "version": "1.0.0",
+  "description": "Test suite for light-switch web UI",
+  "scripts": {
+    "test": "node test-runner.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^21.0.0"
+  }
+}
